@@ -31,7 +31,7 @@ class Course(models.Model):
 
 
 class Lesson(models.Model):
-    """Модель урока"""
+    """Модель урока, параметр url это ссылка на видео урока"""
     name = models.CharField(
         max_length=100,
         verbose_name='название урока',
@@ -51,7 +51,7 @@ class Lesson(models.Model):
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
-        related_name='course',
+        related_name='lesson_set',
         verbose_name='курс',
         help_text='выберите курс'
     )
