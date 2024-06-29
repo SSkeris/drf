@@ -4,12 +4,16 @@ from django.db import models
 from materials.models import Course, Lesson
 
 NULLABLE = {"blank": True, "null": True}
+METHOD_CHOICES = [
+    ('Cash', 'Наличные'),
+    ('Non-cash', 'Безнал'),
+]
 
 
 class User(AbstractUser):
     """Модель пользователя"""
 
-    name = None
+    username = None
     email = models.EmailField(
         unique=True,
         verbose_name="email",
@@ -48,10 +52,6 @@ class User(AbstractUser):
 class Payment(models.Model):
     """Модель оплаты"""
 
-    METHOD_CHOICES = [
-        ('Cash', 'Наличные'),
-        ('Non-cash', 'Безнал'),
-    ]
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
