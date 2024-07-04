@@ -11,7 +11,7 @@ class UrlValidator:
 
     def __call__(self, value):
         url = value.get(self.field)
-        if url and not url.startswith('http://www.youtube.com/'):
+        if url and not url.startswith('https://www.youtube.com/'):
             raise ValidationError('Можно указывать ссылку только с сайта http://www.youtube.com/')
 
     # def __call__(self, value):  # другой вариант записи метода __call__
