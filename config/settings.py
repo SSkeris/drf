@@ -99,6 +99,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+DOMAIN_NAME = 'http://localhost:8000'
+
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = (BASE_DIR / "static",)
