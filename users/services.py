@@ -23,7 +23,7 @@ def create_stripe_price(amount, name):
 
 def create_stripe_session(price, instance_pk):
     """ Создание сессии на оплату в Stripe. """
-    session = stripe.Session.create(
+    session = stripe.checkout.Session.create(
         success_url=f'{settings.DOMAIN_NAME}/payment/success/{instance_pk}',
         line_items=[{"price": price.get('id'), "quantity": 1}],
         mode='payment',
@@ -33,5 +33,5 @@ def create_stripe_session(price, instance_pk):
 
 def checkout_session(session_id):
     """ Проверка статуса платежа в Stripe. """
-    payment_status = stripe.checkout.Session.retrieve(session_id, )
+    payment_status = stripe.checkout.Session.retrieve(session_id)
     return payment_status.get('payment_status')
