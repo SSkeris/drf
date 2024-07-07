@@ -1,3 +1,4 @@
+from django.views.generic import DetailView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import generics
@@ -91,3 +92,7 @@ class PaymentCreateAPIView(generics.CreateAPIView):
         instance.session_id = session_id
         instance.payment_link = payment_link
         instance.save()
+
+
+class PaymentDetailView(DetailView):
+    model = Payment
