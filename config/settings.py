@@ -23,7 +23,8 @@ INSTALLED_APPS = [
 
     "rest_framework",
     "django_filters",
-    'rest_framework_simplejwt',
+    "rest_framework_simplejwt",
+    "drf_yasg",
 
     "users",
     "materials",
@@ -98,6 +99,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+DOMAIN_NAME = 'http://localhost:8000'
+
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = (BASE_DIR / "static",)
@@ -113,3 +116,5 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
