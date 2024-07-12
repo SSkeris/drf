@@ -126,7 +126,7 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_BEAT_SCHEDULE = {
     'check_last_login': {
         'task': 'users.tasks.check_last_login',
-        'schedule': timedelta(minutes=10),
+        'schedule': timedelta(seconds=10),
     },
 }
 
