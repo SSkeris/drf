@@ -1,9 +1,13 @@
+from datetime import datetime
+
+import pytz
 from django.views.generic import DetailView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from config import settings
 from materials.models import Course, Lesson
 from users.models import User, Payment
 from users.permissions import IsUser
@@ -16,9 +20,10 @@ class UserCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        """Хеширование пароля"""
+        """ Хеширование пароля. Переопределение ласт логина нужно для отложенных задач. """
         instance = serializer.save(is_active=True)
         instance.set_password(instance.password)
+        instance.last_login = datetime.now(pytz.timezone(settings.TIME_ZONE))
         instance.save()
 
 
@@ -28,7 +33,7 @@ class UserUpdateAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsUser]
 
     def perform_update(self, serializer):
-        """Хеширование пароля при редактировании"""
+        """ Хеширование пароля при редактировании. """
         instance = serializer.save()
         instance.set_password(instance.password)
         instance.save()
@@ -43,7 +48,7 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
 
     def get_serializer_class(self):
-        """Проверка на владельца профиля"""
+        """ Проверка на владельца профиля. """
         if self.request.user.email == self.get_object().email:
             return UserSerializer
         else:
@@ -73,7 +78,7 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
 
     def perform_create(self, serializer):
-        """Привязывает платеж к пользователю при создании"""
+        """ Привязывает платеж к пользователю при создании. """
         instance = serializer.save()
         instance.user = self.request.user
 
