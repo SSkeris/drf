@@ -52,6 +52,7 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
 
 class UserDestroyAPIView(generics.DestroyAPIView):
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsUser]
 
 
 # class UserViewSet(ModelViewSet):
