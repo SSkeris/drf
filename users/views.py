@@ -79,12 +79,12 @@ class PaymentCreateAPIView(generics.CreateAPIView):
         course_id = self.request.data.get('paid_course')
         lesson_id = self.request.data.get('paid_lesson')
         if course_id:
-            course_name = create_stripe_product(Course.objects.get(pk=course_id).name)
-            course_price = create_stripe_price(instance.paid_course.amount, course_name)
+            course_product = create_stripe_product(Course.objects.get(pk=course_id).name)
+            course_price = create_stripe_price(instance.paid_course.amount, course_product)
             session_id, payment_link = create_stripe_session(course_price, instance.pk)
         else:
-            lesson_name = create_stripe_product(Lesson.objects.get(pk=lesson_id).name)
-            lesson_price = create_stripe_price(instance.paid_lesson.amount, lesson_name)
+            lesson_product = create_stripe_product(Lesson.objects.get(pk=lesson_id).name)
+            lesson_price = create_stripe_price(instance.paid_lesson.amount, lesson_product)
             session_id, payment_link = create_stripe_session(lesson_price, instance.pk)
 
         payment_status = checkout_session(session_id)
