@@ -9,6 +9,7 @@ from materials.permissions import IsModerator, IsOwner
 
 from materials.models import Course, Lesson
 from materials.serializers import CourseSerializer, LessonSerializer
+from materials.tasks import send_updates
 
 
 @method_decorator(name='list', decorator=swagger_auto_schema(
@@ -20,13 +21,19 @@ class CourseViewSet(ModelViewSet):
     pagination_class = CustomPaginator
 
     def perform_create(self, serializer):
-        """Привязывает курс к пользователю при создании"""
+        """ Привязывает курс к пользователю при создании. """
         instance = serializer.save()
         instance.owner = self.request.user
         instance.save()
 
+    def perform_update(self, serializer):
+        """ Запускает send_updates при редактировании курса. """
+        instance = serializer.save()
+        send_updates.delay(instance.pk)
+        instance.save()
+
     def get_permissions(self):
-        """Настройка прав для ViewSet"""
+        """ Настройка прав для ViewSet. """
         if self.action in ['update', 'partial_update', 'list', 'retrieve']:
             self.permission_classes = [IsAuthenticated, IsModerator | IsOwner]
         elif self.action == 'create':
@@ -41,7 +48,7 @@ class LessonCreateAPIView(CreateAPIView):
     permission_classes = [~IsModerator, IsAuthenticated]
 
     def perform_create(self, serializer):
-        """Привязывает урок к пользователю при создании"""
+        """ Привязывает урок к пользователю при создании. """
         instance = serializer.save()
         instance.owner = self.request.user
         instance.save()
