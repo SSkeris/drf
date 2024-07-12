@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "drf_yasg",
+    'django_celery_beat',
 
     "users",
     "materials",
@@ -118,3 +119,23 @@ SIMPLE_JWT = {
 }
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
+CELERY_BEAT_SCHEDULE = {
+    'check_last_login': {
+        'task': 'users.tasks.check_last_login',
+        'schedule': timedelta(seconds=10),
+    },
+}
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', False) == 'True'
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL', False) == 'True'
+
+SERVER_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

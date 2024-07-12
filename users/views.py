@@ -1,9 +1,13 @@
+from datetime import datetime
+
+import pytz
 from django.views.generic import DetailView
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters
 from rest_framework import generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from config import settings
 from materials.models import Course, Lesson
 from users.models import User, Payment
 from users.permissions import IsUser
@@ -16,9 +20,10 @@ class UserCreateAPIView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def perform_create(self, serializer):
-        """Хеширование пароля"""
+        """ Хеширование пароля. Переопределение ласт логина нужно для отложенных задач. """
         instance = serializer.save(is_active=True)
         instance.set_password(instance.password)
+        instance.last_login = datetime.now(pytz.timezone(settings.TIME_ZONE))
         instance.save()
 
 
@@ -28,7 +33,7 @@ class UserUpdateAPIView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsUser]
 
     def perform_update(self, serializer):
-        """Хеширование пароля при редактировании"""
+        """ Хеширование пароля при редактировании. """
         instance = serializer.save()
         instance.set_password(instance.password)
         instance.save()
@@ -43,7 +48,7 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
     queryset = User.objects.all()
 
     def get_serializer_class(self):
-        """Проверка на владельца профиля"""
+        """ Проверка на владельца профиля. """
         if self.request.user.email == self.get_object().email:
             return UserSerializer
         else:
@@ -52,6 +57,7 @@ class UserRetrieveAPIView(generics.RetrieveAPIView):
 
 class UserDestroyAPIView(generics.DestroyAPIView):
     queryset = User.objects.all()
+    permission_classes = [IsAuthenticated, IsUser]
 
 
 # class UserViewSet(ModelViewSet):
@@ -72,19 +78,19 @@ class PaymentCreateAPIView(generics.CreateAPIView):
     serializer_class = PaymentSerializer
 
     def perform_create(self, serializer):
-        """Привязывает платеж к пользователю при создании"""
+        """ Привязывает платеж к пользователю при создании. """
         instance = serializer.save()
         instance.user = self.request.user
 
         course_id = self.request.data.get('paid_course')
         lesson_id = self.request.data.get('paid_lesson')
         if course_id:
-            course_name = create_stripe_product(Course.objects.get(pk=course_id).name)
-            course_price = create_stripe_price(instance.paid_course.amount, course_name)
+            course_product = create_stripe_product(Course.objects.get(pk=course_id).name)
+            course_price = create_stripe_price(instance.paid_course.amount, course_product)
             session_id, payment_link = create_stripe_session(course_price, instance.pk)
         else:
-            lesson_name = create_stripe_product(Lesson.objects.get(pk=lesson_id).name)
-            lesson_price = create_stripe_price(instance.paid_lesson.amount, lesson_name)
+            lesson_product = create_stripe_product(Lesson.objects.get(pk=lesson_id).name)
+            lesson_price = create_stripe_price(instance.paid_lesson.amount, lesson_product)
             session_id, payment_link = create_stripe_session(lesson_price, instance.pk)
 
         payment_status = checkout_session(session_id)
